@@ -49,6 +49,19 @@
             color: white;
             font-size: 0.9em;
         }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
@@ -57,11 +70,14 @@
     </header>
     <div id="reader"></div>
     <div id="result">Escanee un código QR para ver el resultado aquí.</div>
+    <button id="stopButton">Detener Escaneo</button>
     <footer>
         &copy; 2025 Lector QR. Todos los derechos reservados.
     </footer>
 
     <script>
+        let html5QrCode;
+
         function onScanSuccess(decodedText, decodedResult) {
             // Maneja el texto decodificado
             document.getElementById('result').innerText = `Resultado: ${decodedText}`;
@@ -72,17 +88,36 @@
             console.warn(`Error de escaneo: ${errorMessage}`);
         }
 
-        const html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        function startScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-        html5QrCode.start(
-            { facingMode: "environment" }, // Usa la cámara trasera si está disponible
-            config,
-            onScanSuccess,
-            onScanError
-        ).catch(err => {
-            console.error(`No se pudo iniciar el lector de QR: ${err}`);
-        });
+            html5QrCode.start(
+                { facingMode: "environment" }, // Usa la cámara trasera si está disponible
+                config,
+                onScanSuccess,
+                onScanError
+            ).catch(err => {
+                console.error(`No se pudo iniciar el lector de QR: ${err}`);
+                document.getElementById('result').innerText = `Error: ${err}`;
+            });
+        }
+
+        function stopScanner() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('result').innerText = "Escaneo detenido.";
+                }).catch(err => {
+                    console.error(`Error al detener el escaneo: ${err}`);
+                });
+            }
+        }
+
+        document.getElementById('stopButton').addEventListener('click', stopScanner);
+
+        // Inicia el escáner automáticamente al cargar la página
+        startScanner();
     </script>
 </body>
 </html>
+
