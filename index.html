@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lector de Código QR</title>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        #reader {
+            width: 300px;
+            margin: 30px auto;
+            padding: 10px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #4CAF50;
+            background-color: #e8f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        footer {
+            margin-top: 30px;
+            padding: 10px 0;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Lector de Código QR</h1>
+    </header>
+    <div id="reader"></div>
+    <div id="result">Escanee un código QR para ver el resultado aquí.</div>
+    <footer>
+        &copy; 2025 Lector QR. Todos los derechos reservados.
+    </footer>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // Maneja el texto decodificado
+            document.getElementById('result').innerText = `Resultado: ${decodedText}`;
+        }
+
+        function onScanError(errorMessage) {
+            // Maneja errores de escaneo si es necesario
+            console.warn(`Error de escaneo: ${errorMessage}`);
+        }
+
+        const html5QrCode = new Html5Qrcode("reader");
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+        html5QrCode.start(
+            { facingMode: "environment" }, // Usa la cámara trasera si está disponible
+            config,
+            onScanSuccess,
+            onScanError
+        ).catch(err => {
+            console.error(`No se pudo iniciar el lector de QR: ${err}`);
+        });
+    </script>
+</body>
+</html>
