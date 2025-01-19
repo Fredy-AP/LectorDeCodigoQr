@@ -6,6 +6,7 @@
     <title>Lector de Código QR</title>
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
     <style>
+        /* Estilo general del cuerpo */
         body {
             font-family: 'Roboto', sans-serif;
             text-align: center;
@@ -14,6 +15,7 @@
             background-color: #f4f6f9;
             color: #333;
         }
+        /* Estilo del encabezado */
         header {
             background-color: #4CAF50;
             color: white;
@@ -24,6 +26,7 @@
             margin: 0;
             font-size: 2em;
         }
+        /* Estilo del contenedor del lector */
         #reader {
             width: 300px;
             margin: 30px auto;
@@ -33,6 +36,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+        /* Estilo del resultado del escaneo */
         #result {
             margin-top: 20px;
             font-size: 1.2em;
@@ -42,6 +46,7 @@
             border-radius: 5px;
             display: inline-block;
         }
+        /* Estilo del pie de página */
         footer {
             margin-top: 30px;
             padding: 10px 0;
@@ -49,6 +54,7 @@
             color: white;
             font-size: 0.9em;
         }
+        /* Estilo de los botones */
         button {
             margin-top: 10px;
             padding: 10px 20px;
@@ -68,51 +74,74 @@
     <header>
         <h1>Lector de Código QR</h1>
     </header>
+    <!-- Contenedor para mostrar el lector de QR -->
     <div id="reader"></div>
+    <!-- Área donde se muestra el resultado del escaneo -->
     <div id="result">Escanee un código QR para ver el resultado aquí.</div>
+    <!-- Botón para detener el escaneo -->
     <button id="stopButton">Detener Escaneo</button>
     <footer>
         &copy; 2025 Lector QR. Todos los derechos reservados.
     </footer>
 
     <script>
-        let html5QrCode;
+        let html5QrCode; // Variable para manejar el objeto del lector QR
 
+        // Función que se ejecuta cuando se escanea correctamente un código QR
         function onScanSuccess(decodedText, decodedResult) {
-            // Maneja el texto decodificado
+            // Muestra el texto decodificado en el contenedor de resultados
             document.getElementById('result').innerText = `Resultado: ${decodedText}`;
         }
 
+        // Función para manejar errores durante el escaneo
         function onScanError(errorMessage) {
-            // Maneja errores de escaneo si es necesario
             console.warn(`Error de escaneo: ${errorMessage}`);
         }
 
+        // Función para iniciar el escáner QR
         function startScanner() {
-            html5QrCode = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            html5QrCode = new Html5Qrcode("reader"); // Inicializa el lector con el contenedor "reader"
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } }; // Configuración del escaneo
 
-            html5QrCode.start(
-                { facingMode: "environment" }, // Usa la cámara trasera si está disponible
-                config,
-                onScanSuccess,
-                onScanError
-            ).catch(err => {
-                console.error(`No se pudo iniciar el lector de QR: ${err}`);
-                document.getElementById('result').innerText = `Error: ${err}`;
+            // Intenta obtener las cámaras disponibles
+            Html5Qrcode.getCameras().then(cameras => {
+                if (cameras && cameras.length) {
+                    // Si hay cámaras disponibles, inicia el escáner con la primera cámara
+                    html5QrCode.start(
+                        cameras[0].id, // ID de la primera cámara
+                        config,
+                        onScanSuccess, // Callback para éxito
+                        onScanError   // Callback para errores
+                    ).catch(err => {
+                        // Manejo de errores al iniciar el lector
+                        console.error(`No se pudo iniciar el lector de QR: ${err}`);
+                        document.getElementById('result').innerText = `Error: ${err}`;
+                    });
+                } else {
+                    // Si no hay cámaras disponibles, muestra un mensaje de error
+                    document.getElementById('result').innerText = "No se encontraron cámaras disponibles.";
+                }
+            }).catch(err => {
+                // Manejo de errores al obtener cámaras
+                console.error(`Error al obtener cámaras: ${err}`);
+                document.getElementById('result').innerText = `Error al obtener cámaras: ${err}`;
             });
         }
 
+        // Función para detener el escáner QR
         function stopScanner() {
             if (html5QrCode) {
                 html5QrCode.stop().then(() => {
+                    // Mensaje al detener el escáner
                     document.getElementById('result').innerText = "Escaneo detenido.";
                 }).catch(err => {
+                    // Manejo de errores al detener el escáner
                     console.error(`Error al detener el escaneo: ${err}`);
                 });
             }
         }
 
+        // Asocia el botón de detener escaneo con la función correspondiente
         document.getElementById('stopButton').addEventListener('click', stopScanner);
 
         // Inicia el escáner automáticamente al cargar la página
